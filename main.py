@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import bcrypt
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
@@ -36,7 +37,7 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-        if user and check_password_hash(user.password, password):
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             session['username'] = username
             return redirect(url_for('chat'))
         else:
@@ -54,7 +55,8 @@ def register():
         if password != confirm_password:
             return render_template('register.html', error='Passwords do not match.')
 
-        hashed_password = generate_password_hash(password)
+        # Hash the password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
@@ -64,6 +66,8 @@ def register():
 
     return render_template('register.html')
 
+
+
 @app.route('/chat')
 def chat():
     if 'username' in session:
@@ -71,6 +75,21 @@ def chat():
         return render_template('chat.html', messages=messages)
     else:
         return redirect(url_for('login'))
+
+@app.route('/external-chat', methods=['POST'])
+def external_chat():
+    # Retrieve username and message from request data
+    data = request.json
+    username = data.get('username')
+    message = data.get('message')
+    if username and message:
+        sender = username
+        chat_message = ChatMessage(sender=sender, content=message)
+        db.session.add(chat_message)
+        db.session.commit()
+        socketio.emit('message', {'sender': sender, 'content': message}, broadcast=True)
+        return jsonify({'success': True})
+    return jsonify({'error': 'Invalid data format'}), 400
 
 @app.route('/clear_chat', methods=['GET'])
 def clear_chat():
