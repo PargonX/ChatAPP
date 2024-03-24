@@ -11,10 +11,12 @@
         <a href="/logout"><button>Logout</button></a>
     </div>
     <div class="chat-container">
+        <h1>VNXChat</h1>
+
         <div class="chat-box" id="chatMessages">
             {% for message in messages %}
                 <div class="message">
-                    <span class="sender">{{ message.sender }}</span>: {{ message.content }}
+                    <span class="sender">[{{ message.sender }}]</span> {{ message.content }}
                 </div>
             {% endfor %}
         </div>

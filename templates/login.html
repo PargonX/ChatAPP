@@ -25,6 +25,26 @@
             max-width: 400px;
             width: 100%;
             text-align: center;
+            position: relative; /* Position relative for absolute positioning */
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+            z-index: 999; /* Ensure the overlay is on top of other elements */
+            display: none; /* Initially hidden */
+        }
+
+        /* Center the form vertically and horizontally */
+        .form-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         h2 {
@@ -59,13 +79,34 @@
             color: #ff4d4d;
             margin-bottom: 10px;
         }
+
+        /* Flash message box */
+        .flash-messages {
+            background-color: #6a0dad; /* Ultraviolet color */
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .flash-message {
+            color: #fff;
+        }
     </style>
 </head>
 <body>
     <div class="form-container">
         <h2>Login</h2>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <form action="/login" method="post">
-            <input type="text" name="username" placeholder="Username"><br>
+            <input type="text" name="username_or_email" placeholder="Username or Email"><br>
             <input type="password" name="password" placeholder="Password"><br>
             <button type="submit">Login</button>
         </form>
@@ -74,5 +115,8 @@
             <p class="error">{{ error }}</p>
         {% endif %}
     </div>
+
+    <!-- Overlay -->
+    <div class="overlay"></div>
 </body>
 </html>

@@ -41,7 +41,7 @@ body {
     width: 60%; /* Adjust width as needed */
     max-width: 500px;
     height: 400px;
-    border: 1px solid #5865F2;
+    border: 2px solid #5865F2;
     border-radius: 10px;
     overflow-y: auto;
     background-color: #1f1f1f;
@@ -50,6 +50,8 @@ body {
 }
 
 .message {
+    word-wrap: break-word;
+    text-align: left;
     color: #fff;
     margin-bottom: 5px;
 }

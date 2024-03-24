@@ -6,7 +6,7 @@ socket.on('message', (message) => {
     const chatMessages = document.getElementById('chatMessages');
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
-    messageElement.innerHTML = `<span class="sender">${message.sender}</span>: ${message.content}`;
+    messageElement.innerHTML = `<span class="sender">[${message.sender}]</span> ${message.content}`;
     chatMessages.appendChild(messageElement);
 
     // Scroll to bottom of chat box
