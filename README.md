@@ -37,7 +37,7 @@ Futuristic Chat is a simple chat application built using Flask and Socket.IO. It
     ```bash
     python app.py
     ```
-4. Conifgure your mail server and a random secrete key in conifg.yml
+4. Conifgure your mail server and a random secret key in conifg.yml
 5. Access the application in your web browser at `http://localhost:5000`.
 
 ## Usage
