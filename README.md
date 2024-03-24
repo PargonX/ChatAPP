@@ -5,6 +5,7 @@ Futuristic Chat is a simple chat application built using Flask and Socket.IO. It
 ## Features
 
 - User registration and authentication
+- Email Authentication and verificatoin
 - Real-time chat using WebSocket
 - Simple and intuitive user interface
 - Clear chat functionality
