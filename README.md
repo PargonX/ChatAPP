@@ -25,8 +25,22 @@ This is a simple chat application built with Flask, SQLAlchemy, Flask-SocketIO, 
     pip install -r requirements.txt
     ```
 
-3. Configure your application by editing the `config.yml` file. Make sure to set up your mail server details and secret key.
-
+3. Configuration:
+    - Create a `config.yml` file in the root directory of the project.
+    - Add the following configuration settings to `config.yml`:
+        ```yaml
+        SECRET_KEY: "your_secret_key"
+        SQLALCHEMY_DATABASE_URI: "sqlite:///path/to/database.db"
+        MAIL_SERVER: "your_mail_server"
+        MAIL_PORT: your_mail_port
+        MAIL_USE_TLS: true/false
+        MAIL_USERNAME: "your_mail_username"
+        MAIL_PASSWORD: "your_mail_password"
+        ```
+    - Replace `"your_secret_key"` with a secret key for Flask sessions.
+    - Replace `"sqlite:///path/to/database.db"` with the path where you want to store the SQLite database.
+    - Replace `"your_mail_server"`, `your_mail_port`, `"your_mail_username"`, and `"your_mail_password"` with your SMTP server details for sending verification emails.
+  
 4. Run the application:
 
     ```bash
