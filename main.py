@@ -1,4 +1,4 @@
-from flask import Flask, flash, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, flash, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,6 +8,8 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, BadSignature
 import yaml
 
+# Define the base URL for the application
+app_base_url = 'http://example.com'  # Change example.com to your actual domain name or IP address
 
 app = Flask(__name__)
 
@@ -28,6 +30,7 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    email_verified = db.Column(db.Boolean, default=False)
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,14 +57,15 @@ def login():
         else:
             user = User.query.filter_by(username=username_or_email).first()
 
-        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')) and user.email_verified:
             session['username'] = user.username
             return redirect(url_for('chat'))
+        elif user and not user.email_verified:
+            return render_template('login.html', error='Please verify your email before logging in.')
         else:
             return render_template('login.html', error='Invalid username or password.')
 
     return render_template('login.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -74,25 +78,20 @@ def register():
         if password != confirm_password:
             return render_template('register.html', error='Passwords do not match.')
 
-        # Hash the password
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        # Create a new user with email
-        new_user = User(username=username, password=hashed_password, email=email)
+        new_user = User(username=username, password=hashed_password, email=email, email_verified=False)
         db.session.add(new_user)
         db.session.commit()
 
-        # Generate email verification token
         serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
         token = serializer.dumps(email, salt='email-verification')
 
-        # Send verification email
         msg = Message('Email Verification', sender='pargon@vonix.network', recipients=[email])
-        verification_url = url_for('verify_email', token=token, _external=True)
+        verification_url = f'{app_base_url}{url_for("verify_email", token=token)}'
         msg.body = f'Click the following link to verify your email: {verification_url}'
         mail.send(msg)
 
-        # Flash a success message
         flash('Registration successful! Please check your email to confirm your registration.', 'success')
 
         return redirect(url_for('login'))
@@ -103,13 +102,11 @@ def register():
 def verify_email(token):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     try:
-        email = serializer.loads(token, salt='email-verification', max_age=3600)  # 1 hour expiry
-        # Update user as verified
+        email = serializer.loads(token, salt='email-verification', max_age=3600)
         user = User.query.filter_by(email=email).first()
         if user:
-            user.email_verified = True  # Add a new column in the User model to store email verification status
+            user.email_verified = True
             db.session.commit()
-            # Flash a success message for email verification
             flash('Email verification successful! You can now log in.', 'success')
             return redirect(url_for('login'))
         else:
@@ -119,14 +116,10 @@ def verify_email(token):
         flash('Invalid or expired token. Please request a new verification email.', 'error')
         return redirect(url_for('login'))
 
-
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     if request.method == 'POST':
         email = request.form['email']
-        # Logic to send reset password email
-        # You can use Flask-Mail to send emails
-        # Once the reset email is sent, you can redirect or render a page with a success message
         message = "Password reset email sent. Please check your email."
         return render_template('reset_password.html', message=message)
     return render_template('reset_password.html')
@@ -142,7 +135,6 @@ def chat():
 @app.route('/clear_chat', methods=['GET'])
 def clear_chat():
     if request.method == 'GET':
-        # Clear all chat messages
         ChatMessage.query.delete()
         db.session.commit()
         return redirect(url_for('chat'))
