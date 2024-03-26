@@ -116,14 +116,6 @@ def verify_email(token):
         flash('Invalid or expired token. Please request a new verification email.', 'error')
         return redirect(url_for('login'))
 
-@app.route('/reset_password', methods=['GET', 'POST'])
-def reset_password():
-    if request.method == 'POST':
-        email = request.form['email']
-        message = "Password reset email sent. Please check your email."
-        return render_template('reset_password.html', message=message)
-    return render_template('reset_password.html')
-
 @app.route('/chat')
 def chat():
     if 'username' in session:
