@@ -40,6 +40,7 @@ This is a simple chat application built with Flask, SQLAlchemy, Flask-SocketIO, 
     - Replace `"your_secret_key"` with a secret key for Flask sessions.
     - Replace `"sqlite:///path/to/database.db"` with the path where you want to store the SQLite database.
     - Replace `"your_mail_server"`, `your_mail_port`, `"your_mail_username"`, and `"your_mail_password"` with your SMTP server details for sending verification emails.
+    - Replace "http://example.com" with your chat domain for emails in app.py
   
 4. Run the application:
 
